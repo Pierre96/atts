@@ -248,6 +248,8 @@ export function getInvoiceStatusColor(status: InvoiceStatus): [string, string] {
 
 export function getConsumptionTypeLabel(typeId: ConsumptionType): string {
   switch (typeId) {
+    case ConsumptionType.ABONAMENT_PERIODIQUE:
+      return "Abonnement périodique";
     case ConsumptionType.CDR_MOBILES:
       return "CDR Mobiles";
     case ConsumptionType.CDR_NATIONAUX:

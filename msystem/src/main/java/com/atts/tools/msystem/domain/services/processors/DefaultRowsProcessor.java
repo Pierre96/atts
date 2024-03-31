@@ -84,13 +84,17 @@ public class DefaultRowsProcessor {
 
         public static Integer consumptionDuration(List<Object> row) throws ProcessException {
             try {
-                return (((Double) row.get(17)).intValue());
+                // Check if the value at index 17 is null or not a Double
+                Object durationObj = row.get(17);
+                if (durationObj == null || !(durationObj instanceof Double)) {
+                    return 0; // Return 0 if null or not a Double
+                }
+                return ((Double) durationObj).intValue();
             } catch (IndexOutOfBoundsException err) {
                 throw new ProcessException("consumption duration column doesn't exist");
-            } catch (NullPointerException err) {
-                throw new ProcessException("consumption duration is null");
             }
         }
+
 
         public static Double htAmount(List<Object> row) throws ProcessException {
             try {

@@ -28,9 +28,10 @@ export enum InvoiceStatus {
 
 
 export enum ConsumptionType {
+    ABONAMENT_PERIODIQUE = "ABONAMENT_PERIODIQUE",
     CDR_MOBILES = "CDR_MOBILES",
     CDR_NATIONAUX = "CDR_NATIONAUX",
-    CDR_INTERNATIONAUX = "CDR_INTERNATIONAUX",
+    CDR_INTERNATIONAUX = "CDR_internationaux",
     CDR_SVA_A = "CDR_SVA_A",
     CDR_SVA_B = "CDR_SVA_B",
     CDR_SVA_D = "CDR_SVA_D",

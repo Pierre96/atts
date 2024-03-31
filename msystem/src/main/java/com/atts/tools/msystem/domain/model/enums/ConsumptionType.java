@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 public enum ConsumptionType {
     CDR_MOBILES("CDR Mobiles"),
-    CDR_NATIONAUX("CDR Nationaux'"),
-    CDR_internationaux("CDR Internationaux'"),
+    CDR_NATIONAUX("CDR Nationaux"),
+    CDR_internationaux("CDR Internationaux"),
     CDR_SVA_A("CDR SVA A"),
     CDR_SVA_B("CDR SVA B"),
     CDR_SVA_D("CDR SVA D"),
@@ -33,6 +33,10 @@ public enum ConsumptionType {
     }
 
     public static Boolean isResetableConsumption(ConsumptionType consumptionType) {
+        return isSvaConsumption(consumptionType);
+    }
+
+    public static boolean isSvaConsumption(ConsumptionType consumptionType) {
         return CDR_SVA_A.equals(consumptionType) || CDR_SVA_B.equals(consumptionType)
             || CDR_SVA_D.equals(consumptionType) || CDR_SVA_G.equals(consumptionType);
     }
