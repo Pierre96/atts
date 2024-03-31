@@ -92,8 +92,8 @@ function Profile() {
   };
 
   useEffect(() => {
-    if (userInfosKeyCloak?.email) {
-      fetchUser(userInfosKeyCloak?.email);
+    if (userInfosKeyCloak?.username) {
+      fetchUser(userInfosKeyCloak?.username);
     }
   }, [userInfosKeyCloak]);
 
@@ -255,7 +255,7 @@ function Profile() {
             />
           </Box>
 
-          <EmailTemplates userEmail={userInfosKeyCloak?.email || ""} />
+          <EmailTemplates userEmail={userInfosKeyCloak?.username || ""} />
 
           <PasswordModificationDialog open={open} onClose={handleClose} />
         </Box>
