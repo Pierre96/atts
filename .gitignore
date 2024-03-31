@@ -6,3 +6,7 @@
 ## ignore mysql folder ##
 mysql/*
 invoices/*
+data
+*.cer
+*.key
+.env

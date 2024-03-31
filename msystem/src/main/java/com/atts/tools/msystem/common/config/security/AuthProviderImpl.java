@@ -108,7 +108,7 @@ public class AuthProviderImpl implements AuthProvider {
     public List<User> findAllAdminUsers() {
         return getRoleRepresentation(Role.ADMIN).getUserMembers().stream().map(
             userRepresentation -> User.builder().email(userRepresentation.getUsername())
-                .email(userRepresentation.getEmail()).build()
+                .email(userRepresentation.getUsername()).build()
         ).collect(Collectors.toList());
     }
 

@@ -41,6 +41,9 @@ public class SecurityConfig {
     @Value("${keycloak.client-secret}")
     private String keycloakClientSecret;
 
+    @Value("${frontend.host}")
+    private String frontendUrl;
+
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         //TODO fix csrf problem before deploy
@@ -55,7 +58,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
                    CorsConfiguration config = new CorsConfiguration();
-                   config.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                   config.setAllowedOrigins(Collections.singletonList(frontendUrl));
                    config.setAllowedMethods(Collections.singletonList("*"));
                    config.setAllowCredentials(true);
                    config.setAllowedHeaders(Collections.singletonList("*"));
@@ -72,17 +75,10 @@ public class SecurityConfig {
 
         return KeycloakBuilder.builder()
                 .serverUrl(keyclockUrl)
-//                .realm("master")
-//                .grantType(OAuth2Constants.PASSWORD)
-//                .username(ke)
-//                .password("admin")
-                .clientId("admin-cli")
-                .realm("master")
+                .realm(keycloakRealm)
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
-//                .username("admin")
-//                .password("admin")
-                .clientSecret("OkidE95rHmfnIvRI6ZWrAlO817BozgRl")
-//                .clientId(keycloakClientId)
+                .clientSecret(keycloakClientSecret)
+                .clientId(keycloakClientId)
                 .build();
     }
 

@@ -1,0 +1,19 @@
+keycloak:
+  realm: atts-development
+  url: https://v1.factureapi.fr:8080
+  client-secret: QkMx6TaM8UA0aPt5xOZTzOTIPN59OZk6
+frontend:
+  host: http://localhost:3000
+
+spring:
+  mail:
+#    host: smtp.ionos.fr
+#    port: 465
+#    username: invoice@atts.fr
+#    password: Invoice2022
+    host: smtp.gmail.com
+    port: 587
+    username: testatts12@gmail.com
+    password: evxzqqiffikmecce
+  datasource:
+    url: jdbc:mysql://localhost:3306/atts

@@ -1,32 +1,99 @@
-version: '4.0'
+version: '3'
 
 services:
-#  keycloak:
-#    image: jboss/keycloak:latest
-#    environment:
-#      KEYCLOAK_USER: admin
-#      KEYCLOAK_PASSWORD: admin
-#      DB_VENDOR: h2
-#    volumes:
-#      - keycloak_data:/opt/jboss/keycloak/standalone/data
-#    ports:
-#      - 8080:8080
-  db:
-    image: mysql:latest
-    container_name: atts_db
+  frontend:
+    image: atts_frontend
+    restart: always
+    build:
+      context: ./front
+      args:
+        REACT_APP_BASE_URL: ${REACT_APP_BASE_URL}
+        REACT_APP_KEYCLOAK_REALM: ${REACT_APP_KEYCLOAK_REALM}
+        REACT_APP_KEYCLOAK_URL: ${REACT_APP_KEYCLOAK_URL}
+        REACT_APP_KEYCLOAK_CLIENT_ID: ${REACT_APP_KEYCLOAK_CLIENT_ID}
+        REACT_APP_KEYCLOAK_RESOURCE: ${REACT_APP_KEYCLOAK_RESOURCE}
+      dockerfile: Dockerfile
     ports:
-      - "3306:3306"
+      - "8083:80"
+    container_name: my-atts-frontend
+    depends_on:
+      - backend
+      - keycloak
+  backend:
+    image: atts_backend
+    build:
+      context: ./msystem
+      dockerfile: Dockerfile
     environment:
-      MYSQL_DATABASE: 'atts'
-      # So you don't have to use root, but you can if you like
-      MYSQL_USER: 'atts'
-      # You can use whatever password you like
-      MYSQL_PASSWORD: 'atts'
-      # Password for root access
-      MYSQL_ROOT_PASSWORD: 'root'
-#    command: --sql_mode="STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION"
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - KEYCLOACK_CLIENT_SECRET=${KEYCLOACK_CLIENT_SECRET}
+      - FE_URL=${FE_URL}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${EMAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - DB_URL=${DB_URL}
+    restart: always
+    ports:
+      - "${BE_PORT}:8082"
+    container_name: my-atts-backend
+    depends_on:
+      - keycloak
+      - mysql
     volumes:
-      - ./mysql:/var/lib/mysql
-    
-#volumes:
-#  keycloak_data:
+      - be-vol:/app/invoices
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    restart: always
+    ports:
+      - 8080:8443
+    volumes:
+      - /root/atts_deploy/atts/factureapi.fr_ssl_certificate.cer:/etc/x509/https/tls.crt
+      - /root/atts_deploy/atts/_.factureapi.fr_private_key.key:/etc/x509/https/tls.key
+      - keycloak-vol:/opt/keycloak/data
+    environment:
+      - KEYCLOAK_ADMIN=keycloak_admin
+      - KEYCLOAK_ADMIN_PASSWORD=keycloak_12
+      - KC_HTTPS_CERTIFICATE_KEY_FILE=/etc/x509/https/tls.key
+      - KC_HTTPS_CERTIFICATE_FILE=/etc/x509/https/tls.crt
+      # - KC_HOSTNAME_STRICT=false
+      # - KC_HOSTNAME=localhost
+      # - DB_URL_HOST=mysql
+      # - DB_SCHEMA=keycloak
+      # - DB_USERNAME=keycloak
+      # - DB_PASSWORD=keycloak
+    command:
+      - "start-dev"
+  mysql:
+    image: mysql:8.0
+    restart: always
+    container_name: mysql_db
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_DATABASE=db
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 3306:3306
+    volumes:
+      - db-vol:/var/lib/mysql
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
+volumes:
+  db-vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./data/db_data
+      o: bind
+  be-vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./data/be_data
+      o: bind
+  keycloak-vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./data/keycloak_data
+      o: bind

@@ -1,0 +1,14 @@
+keycloak:
+  realm: atts
+  url: ${KEYCLOAK_URL}
+  client-secret: ${KEYCLOACK_CLIENT_SECRET}
+frontend:
+  host: ${FE_URL}
+spring:
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+  datasource:
+    url: ${DB_URL}

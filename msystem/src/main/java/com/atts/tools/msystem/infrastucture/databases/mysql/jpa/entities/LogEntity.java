@@ -32,7 +32,7 @@ public class LogEntity implements DBEntity {
     @Column(name = "level", length = 45)
     private String level;
 
-    @Size(max = 150)
+    @Size(max = 600)
     @Column(name = "message", length = 150)
     private String message;
 
