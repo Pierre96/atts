@@ -8,9 +8,11 @@ spring:
       mail:
         smtp:
           auth: true
-          starttls:
+          ssl:
             enable: true
-            required: true
+#          starttls:
+#            enable: true
+#            required: true
     default-encoding: UTF-8
   security:
     oauth2:

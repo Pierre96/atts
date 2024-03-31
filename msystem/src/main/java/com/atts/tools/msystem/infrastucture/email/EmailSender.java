@@ -49,7 +49,8 @@ public class EmailSender implements EmailPort {
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, UTF_8);
 
             messageHelper.setSubject(String.format("Invoice %s", invoiceFile.getFilename()));
-            messageHelper.setFrom(fromEmail);
+//            messageHelper.setFrom(fromEmail);
+            messageHelper.setFrom("atts <" + fromEmail + ">");
             messageHelper.setTo(to);
             messageHelper.setPriority(2);
             messageHelper.setText(bodyText, hasHTMLTags(bodyText));
