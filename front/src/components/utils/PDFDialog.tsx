@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import PDFViewer from './PDFViewer';
 
 interface PDFDialogProps {
@@ -16,7 +16,7 @@ const PDFDialog: React.FC<PDFDialogProps> = ({ pdfFile, pdfFileName, open, onClo
       onClose={onClose}
       aria-labelledby="pdf-dialog-title"
       maxWidth="lg" // Adjust size as needed
-    //   fullWidth
+      fullWidth
     >
       <DialogTitle id="pdf-dialog-title">{pdfFileName}</DialogTitle>
       <DialogContent dividers>

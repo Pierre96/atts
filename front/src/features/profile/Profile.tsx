@@ -20,6 +20,8 @@ import { KeycloakProfile } from "keycloak-js";
 import ClientAvatar from "../../components/ClientForms/ClientAvatar";
 import PasswordModificationDialog from "../../components/ProfileComponents/PasswordModification/PasswordModificationDialog";
 import EmailTemplates from "../../components/ProfileComponents/EmailTemplates/EmailTemplates";
+import useRole from "../../hooks/useRole";
+import { ROLES } from "../../lib/constants/utilsConstants";
 
 // User Schema
 export const userSchema = yup.object({
@@ -55,6 +57,8 @@ function Profile() {
     [UC.USER_EMAIL]: "",
     [UC.USER_PHONE]: "",
   };
+
+  const isAdmin = useRole([ROLES.ADMIN]);
 
   const methods = useForm({
     resolver: yupResolver(userSchema),
@@ -254,8 +258,9 @@ function Profile() {
               }}
             />
           </Box>
-
-          <EmailTemplates userEmail={userInfosKeyCloak?.username || ""} />
+          {isAdmin && (
+            <EmailTemplates userEmail={userInfosKeyCloak?.username || ""} />
+          )}
 
           <PasswordModificationDialog open={open} onClose={handleClose} />
         </Box>

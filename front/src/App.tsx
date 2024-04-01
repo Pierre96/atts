@@ -23,8 +23,8 @@ import NotAllowed from "./components/NotAllowed";
 import { ROLES } from "./lib/constants/utilsConstants";
 import useRole from "./hooks/useRole";
 import History from "./features/history/History";
-
-
+import ClientInvoices from "./features/invoices/ClientInvoices";
+import ClientInvoiceDetail from "./features/invoice/ClientInvoiceDetail";
 
 function App() {
   const dispatch = useDispatch();
@@ -43,10 +43,11 @@ function App() {
           <Route path="login" element={<Login />} />
           <Route path="notAllowed" element={<NotAllowed />} />
           <Route element={<ProtectedRoute />}>
-            {
-              isAdmin ? <Route path="/" element={<Navigate to="/clients" replace />} />
-                : <Route path="/" element={<Navigate to="/invoices" replace />} />
-            }
+            {isAdmin ? (
+              <Route path="/" element={<Navigate to="/clients" replace />} />
+            ) : (
+              <Route path="/" element={<Navigate to="/invoices" replace />} />
+            )}
             <Route element={<ProtectedLayout />}>
               <Route element={<RequireAuth allowedRoles={[ROLES.ADMIN]} />}>
                 <Route path="clients" element={<Clients />} />
@@ -54,8 +55,17 @@ function App() {
                 <Route path="history" element={<History />} />
               </Route>
               <Route path="/logout" element={<Logout />} />
-              <Route path="invoices" element={<Invoices />} />
-              <Route path="invoice/:id" element={<InvoiceDetail />} />
+              {isAdmin ? (
+                <>
+                  <Route path="invoices" element={<Invoices />} />
+                  <Route path="invoice/:id" element={<InvoiceDetail />} />
+                </>
+              ) : (
+                <>
+                  <Route path="invoices" element={<ClientInvoices />} />
+                  <Route path="invoice/:id" element={<ClientInvoiceDetail />} />
+                </>
+              )}
               <Route path="profile" element={<Profile />} />
             </Route>
           </Route>
