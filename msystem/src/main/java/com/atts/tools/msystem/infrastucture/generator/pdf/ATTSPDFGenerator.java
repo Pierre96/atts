@@ -32,6 +32,9 @@ import com.itextpdf.layout.properties.VerticalAlignment;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
@@ -299,22 +302,27 @@ public class ATTSPDFGenerator implements FileGeneratorPort {
     }
 
     public void addConsumptions(Document document, Invoice invoice) {
-        Consumption aggregatedSVAConsumptions = null;
+        Map<ConsumptionType, Consumption> aggregatedConsumptionsByType = new HashMap<>();
         for (Consumption consumption : invoice.getConsumptions()) {
-            if (consumption.getType().getLabel().contains("SVA")) {
-                if (aggregatedSVAConsumptions == null) {
-                    aggregatedSVAConsumptions = Consumption.builder()
-                        .consumptionCount(0).consumptionDuration(0).htAmount(0.0)
-                        .type(ConsumptionType.NUMEROUS_SPECIALIS).build();
-                }
-                addToConsumption(aggregatedSVAConsumptions, consumption);
-            } else {
-                appendConsumption(document, consumption);
+            ConsumptionType type = getTye(consumption);
+            if (!aggregatedConsumptionsByType.containsKey(type)) {
+                aggregatedConsumptionsByType.put(type, Consumption.initWithType(type));
             }
+            addToConsumption(aggregatedConsumptionsByType.get(type), consumption);
         }
-        if (aggregatedSVAConsumptions != null) {
-            appendConsumption(document, aggregatedSVAConsumptions);
+        appendConsumptions(document, aggregatedConsumptionsByType.values());
+    }
+
+    private void appendConsumptions(Document document, Collection<Consumption> consumptions) {
+        for (Consumption consumption : consumptions) {
+            appendConsumption(document, consumption);
         }
+    }
+
+    private ConsumptionType getTye(Consumption consumption) {
+        if (consumption.getType().getLabel().contains("SVA"))
+            return ConsumptionType.NUMEROUS_SPECIALIS;
+        return consumption.getType();
     }
 
     private void addToConsumption(Consumption finalConsumption, Consumption toAddConsumption) {

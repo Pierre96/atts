@@ -24,4 +24,10 @@ public class Consumption {
     @Setter
     Double htAmount;
     ConsumptionType type;
+
+    public static Consumption initWithType(ConsumptionType type) {
+        return Consumption.builder()
+            .consumptionCount(0).consumptionDuration(0).htAmount(0.0)
+            .type(type).build();
+    }
 }
