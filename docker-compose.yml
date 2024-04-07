@@ -66,25 +66,33 @@ services:
     command:
       - "start-dev"
   mysql:
-    image: mysql:8.0
+    image: mysql:latest
     restart: always
     container_name: mysql_db
-    command: --default-authentication-plugin=mysql_native_password
+    # command: --default-authentication-plugin=mysql_native_password
     environment:
-      - MYSQL_DATABASE=db
-      - MYSQL_ROOT_PASSWORD=root
+      MYSQL_DATABASE: 'atts'
+      MYSQL_USER: 'atts'
+      MYSQL_PASSWORD: 'atts'
+      MYSQL_ROOT_PASSWORD: 'root'
+    logging:   # Add logging configuration here
+      driver: json-file   # Use json-file logging driver
+      options:
+        max-size: "10m"    # maximum log file size before rotation
+        max-file: "3"
     ports:
       - 3306:3306
     volumes:
-      - db-vol:/var/lib/mysql
-#      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
+      - db-data:/var/lib/mysql
+      # - db-vol:/var/lib/mysql
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
 volumes:
-  db-vol:
+  db-data:
     driver: local
     driver_opts:
-      type: none
+      type: 'none'
       device: ./data/db_data
-      o: bind
+      o: 'bind'
   be-vol:
     driver: local
     driver_opts:
