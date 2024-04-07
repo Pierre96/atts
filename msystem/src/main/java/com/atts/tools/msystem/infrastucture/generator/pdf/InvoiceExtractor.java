@@ -52,13 +52,17 @@ public class InvoiceExtractor {
 
     public String extractConsumptionPeriod(Consumption consumption) {
         StringBuilder builder = new StringBuilder();
-        builder.append(consumption.getType().getLabel());
+        builder.append(removeCDR(consumption.getType().getLabel()));
         builder.append(" [Période du ");
         builder.append(extractDate(consumption.getStartDate()));
         builder.append(" au ");
         builder.append(extractDate(consumption.getEndDate()));
         builder.append("]");
         return builder.toString();
+    }
+
+    private String removeCDR(String consumptionLabel) {
+        return consumptionLabel.replaceAll("CDR[ _]*", "");
     }
 
     public String extractPeriod(Invoice invoice) {

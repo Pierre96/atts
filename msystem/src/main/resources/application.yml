@@ -4,15 +4,6 @@ keycloak:
   client-id: atts-application
 spring:
   mail:
-    properties:
-      mail:
-        smtp:
-          auth: true
-          ssl:
-            enable: true
-#          starttls:
-#            enable: true
-#            required: true
     default-encoding: UTF-8
   security:
     oauth2:

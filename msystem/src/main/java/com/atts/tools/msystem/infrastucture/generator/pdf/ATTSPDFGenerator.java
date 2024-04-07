@@ -1,10 +1,12 @@
 package com.atts.tools.msystem.infrastucture.generator.pdf;
 
+import com.atts.tools.msystem.common.util.DateUtil;
 import com.atts.tools.msystem.common.util.Math;
 import com.atts.tools.msystem.domain.model.Consumption;
 import com.atts.tools.msystem.domain.model.Invoice;
 import com.atts.tools.msystem.domain.model.Subscription;
 import com.atts.tools.msystem.domain.model.contants.InvoiceConstants;
+import com.atts.tools.msystem.domain.model.enums.ConsumptionType;
 import com.atts.tools.msystem.domain.ports.out.file.FileGeneratorPort;
 
 import com.itextpdf.io.font.constants.StandardFonts;
@@ -83,17 +85,24 @@ public class ATTSPDFGenerator implements FileGeneratorPort {
             Table tableEmail = new Table(new float[]{15, 335});
             Image emailIcon = new Image(
                 ImageDataFactory.create(getResource("emailIcon.png")));
-            emailIcon.scaleToFit(13,13);;
-            tableEmail.addCell(new Cell().add(emailIcon).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
-            tableEmail.addCell(new Cell().add(new Paragraph(" contact@atts.fr")).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
+            emailIcon.scaleToFit(13, 13);
+            ;
+            tableEmail.addCell(
+                new Cell().add(emailIcon).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
+            tableEmail.addCell(new Cell().add(new Paragraph(" contact@atts.fr")).setBorder(Border.NO_BORDER)
+                .setVerticalAlignment(VerticalAlignment.MIDDLE));
             leftCell.add(tableEmail);
 
             Table tableTelephone = new Table(new float[]{15, 335});
             Image telephoneIcon = new Image(
                 ImageDataFactory.create(getResource("telephoneIcon.png")));
-            telephoneIcon.scaleToFit(13,13);;
-            tableEmail.addCell(new Cell().add(telephoneIcon).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
-            tableEmail.addCell(new Cell().add(new Paragraph(" 03.59.25.09.10")).setVerticalAlignment(VerticalAlignment.MIDDLE).setBorder(Border.NO_BORDER));
+            telephoneIcon.scaleToFit(13, 13);
+            ;
+            tableEmail.addCell(new Cell().add(telephoneIcon).setBorder(Border.NO_BORDER)
+                .setVerticalAlignment(VerticalAlignment.MIDDLE));
+            tableEmail.addCell(
+                new Cell().add(new Paragraph(" 03.59.25.09.10")).setVerticalAlignment(VerticalAlignment.MIDDLE)
+                    .setBorder(Border.NO_BORDER));
             leftCell.add(tableTelephone);
 
 
@@ -290,12 +299,40 @@ public class ATTSPDFGenerator implements FileGeneratorPort {
     }
 
     public void addConsumptions(Document document, Invoice invoice) {
+        Consumption aggregatedSVAConsumptions = null;
         for (Consumption consumption : invoice.getConsumptions()) {
-            addSubtableWithFourColumn(document, invoiceExtractor.extractConsumptionPeriod(consumption),
-                String.valueOf(consumption.getConsumptionCount()),
-                invoiceExtractor.extractHHMMSSFromSeconds(consumption.getConsumptionDuration()),
-                String.valueOf(consumption.getHtAmount()));
+            if (consumption.getType().getLabel().contains("SVA")) {
+                if (aggregatedSVAConsumptions == null) {
+                    aggregatedSVAConsumptions = Consumption.builder()
+                        .consumptionCount(0).consumptionDuration(0).htAmount(0.0)
+                        .type(ConsumptionType.NUMEROUS_SPECIALIS).build();
+                }
+                addToConsumption(aggregatedSVAConsumptions, consumption);
+            } else {
+                appendConsumption(document, consumption);
+            }
         }
+        if (aggregatedSVAConsumptions != null) {
+            appendConsumption(document, aggregatedSVAConsumptions);
+        }
+    }
+
+    private void addToConsumption(Consumption finalConsumption, Consumption toAddConsumption) {
+        finalConsumption.setConsumptionCount(
+            finalConsumption.getConsumptionCount() + toAddConsumption.getConsumptionCount());
+        finalConsumption.setConsumptionDuration(
+            finalConsumption.getConsumptionDuration() + toAddConsumption.getConsumptionDuration());
+        finalConsumption.setHtAmount(finalConsumption.getHtAmount() + toAddConsumption.getHtAmount());
+        finalConsumption.setStartDate(
+            DateUtil.minDate(finalConsumption.getStartDate(), toAddConsumption.getStartDate()));
+        finalConsumption.setEndDate(DateUtil.maxDate(finalConsumption.getEndDate(), toAddConsumption.getEndDate()));
+    }
+
+    private void appendConsumption(Document document, Consumption consumption) {
+        addSubtableWithFourColumn(document, invoiceExtractor.extractConsumptionPeriod(consumption),
+            String.valueOf(consumption.getConsumptionCount()),
+            invoiceExtractor.extractHHMMSSFromSeconds(consumption.getConsumptionDuration()),
+            String.valueOf(consumption.getHtAmount()));
     }
 
     public void addSubtableWithFourColumn(Document document, String col1, String col2, String col3, String col4) {

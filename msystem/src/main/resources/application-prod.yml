@@ -6,6 +6,12 @@ frontend:
   host: ${FE_URL}
 spring:
   mail:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
     username: ${MAIL_USERNAME}

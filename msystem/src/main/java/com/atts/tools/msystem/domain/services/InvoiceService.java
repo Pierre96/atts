@@ -5,6 +5,7 @@ import com.atts.tools.msystem.common.config.security.AuthorizationUtil;
 import com.atts.tools.msystem.common.exceptions.ErrorMessageUtil;
 import com.atts.tools.msystem.common.exceptions.types.IlegalRequestException;
 import com.atts.tools.msystem.common.exceptions.types.NotFoundElementException;
+import com.atts.tools.msystem.common.util.DateUtil;
 import com.atts.tools.msystem.common.util.Math;
 import com.atts.tools.msystem.domain.logging.InfoLog;
 import com.atts.tools.msystem.domain.logging.Log;
@@ -173,8 +174,8 @@ public class InvoiceService implements ManageInvoicesUseCase {
                 consumption.setStartDate(invoice.getStartPeriod());
                 consumption.setEndDate(invoice.getEndPeriod());
             } else {
-                startDate = minDate(startDate, consumption.getStartDate());
-                endDate = maxDate(endDate, consumption.getEndDate());
+                startDate = DateUtil.minDate(startDate, consumption.getStartDate());
+                endDate = DateUtil.maxDate(endDate, consumption.getEndDate());
             }
         }
         if (!invoiceHasStartAndEndPeriod) {
@@ -327,29 +328,6 @@ public class InvoiceService implements ManageInvoicesUseCase {
         invoice.setTtcAmount(Math.keep2Digits(ttcTotalAmount));
         invoice.setHtAmount(Math.keep2Digits(totalHtAmount));
         invoice.setSpecialNumbers(totalSvaConsumptionsHtAmount > 0.0);
-    }
-
-    private Date minDate(Date date1, Date date2) {
-        if (date1 == null) {
-            return date2;
-        }
-        if (date2 == null) {
-            return date1;
-        }
-
-        return date1.compareTo(date2) > 0 ? date2 : date1;
-
-    }
-
-    private Date maxDate(Date date1, Date date2) {
-        if (date1 == null) {
-            return date2;
-        }
-        if (date2 == null) {
-            return date1;
-        }
-
-        return date1.compareTo(date2) > 0 ? date1 : date2;
     }
 
     private Double computeAmountForClient(Client client) {

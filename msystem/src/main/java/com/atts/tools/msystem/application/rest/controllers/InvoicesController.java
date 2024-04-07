@@ -65,6 +65,7 @@ public class InvoicesController {
     }
 
     @GetMapping("/{invoiceNumber}")
+    @PreAuthorize("@securityService.hasPermission('INVOICE', #invoiceNumber)")
     public ResponseEntity<Invoice> getInvoice(@PathVariable Integer invoiceNumber) throws NotFoundElementException {
         return ResponseEntity.ok(
             invoiceStoragePort.findById(invoiceNumber).orElseThrow(() -> new NotFoundElementException(
@@ -110,7 +111,7 @@ public class InvoicesController {
     }
 
     @PutMapping("/pdf")
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("@securityService.hasPermission('INVOICE', #request.id())")
     public ResponseEntity<Resource> generatePDF(@RequestBody GeneratePDFRequest request) {
         InvoiceFile invoiceFile = manageInvoicesUseCase.generateFile(request.id());
         return getResourceResponseEntity(invoiceFile, MediaType.APPLICATION_PDF_VALUE);

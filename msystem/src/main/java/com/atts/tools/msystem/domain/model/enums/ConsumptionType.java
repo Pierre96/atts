@@ -10,6 +10,7 @@ public enum ConsumptionType {
     CDR_SVA_B("CDR SVA B"),
     CDR_SVA_D("CDR SVA D"),
     CDR_SVA_G("CDR SVA G"),
+    NUMEROUS_SPECIALIS("Numéros spéciaux"),
     ABONAMENT_PERIODIQUE("Abonnement périodique");
 
     private final String label;

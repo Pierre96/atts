@@ -130,6 +130,9 @@ public class DefaultRowsProcessor {
         //TODO manage startDate > endDate
         for (int rowNumber = 0; rowNumber < rows.size(); ++rowNumber) {
             List<Object> row = rows.get(rowNumber);
+            if (skipRow(row)) {
+                continue;
+            }
             try {
                 ClientReference clientReference = RowExtractor.clientReference(row);
                 String clientName = RowExtractor.clientName(row);
@@ -140,7 +143,7 @@ public class DefaultRowsProcessor {
                 Integer consumptionDuration = RowExtractor.consumptionDuration(row);
                 Integer consumptionCount = RowExtractor.consumptionCount(row);
                 Double htAmount = RowExtractor.htAmount(row);
-                Double tva = RowExtractor.tva(row);
+                Double tva = 20.0;//RowExtractor.tva(row);
                 Consumption consumption = Consumption.builder().consumptionCount(consumptionCount)
                     .consumptionDuration(consumptionDuration).type(type).startDate(startPeriod).htAmount(htAmount)
                     .endDate(endPeriod)
@@ -163,6 +166,17 @@ public class DefaultRowsProcessor {
             }
         }
         return ClientsResults.builder().clientsSummary(clientsSummary).errors(errors).build();
+    }
+
+    public boolean skipRow(List<Object> row ) {
+      try {
+        if (ConsumptionType.ABONAMENT_PERIODIQUE.equals(RowExtractor.consumptionType(row))) {
+            return true;
+        }
+      } catch (ProcessException e) {
+        return true;
+      }
+      return false;
     }
 
 }
