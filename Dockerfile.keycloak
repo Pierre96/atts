@@ -1,0 +1,44 @@
+ARG KEYCLOAK_VERSION=latest
+
+# see https://github.com/aerogear/keycloak-metrics-spi/releases
+#ARG KEYCLOAK_METRICS_SPI_RELEASE=5.0.0
+
+# Optimized Keycloak build nd features enabled
+# https://www.keycloak.org/server/containers
+# https://www.keycloak.org/server/all-config?f=build
+FROM quay.io/keycloak/keycloak:$KEYCLOAK_VERSION as builder
+
+# Enable health and metrics support
+# https://www.keycloak.org/server/health
+ENV KC_HEALTH_ENABLED=true
+ENV KC_METRICS_ENABLED=true
+
+#ENV KC_DB=
+#ENV KC_DRIVER=
+
+#ENV KC_HTTP_RELATIVE_PATH=
+
+WORKDIR /opt/keycloak
+# for demonstration purposes only, please make sure to use proper certificates in production instead
+#RUN keytool -genkeypair -storepass password -storetype PKCS12 -keyalg RSA -keysize 2048 -dname "CN=server" -alias server -ext "SAN:c=DNS:localhost,IP:127.0.0.1" -keystore conf/server.keystore
+RUN /opt/keycloak/bin/kc.sh build
+
+
+FROM quay.io/keycloak/keycloak:$KEYCLOAK_VERSION
+COPY --from=builder /opt/keycloak/ /opt/keycloak/
+
+# Keycloak 21+ doesn't have curl, workaround for https://github.com/keycloak/keycloak/issues/17273
+ADD --chown=root:root --chmod=755 https://github.com/moparisthebest/static-curl/releases/latest/download/curl-amd64 /usr/bin/curl
+ADD --chown=root:root --chmod=755 https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 /usr/bin/jq
+
+# Msut keep previous ENV values used with `build`
+ENV KC_HEALTH_ENABLED=true
+ENV KC_METRICS_ENABLED=true
+
+# Enable HTTP for curl healthcheck
+ENV KC_HTTP_ENABLED=true
+HEALTHCHECK --start-period=60s --start-interval=2s CMD curl --head -fsS http://localhost:8080/health/live
+
+USER keycloak
+#RUN curl -L -k https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -o /tmp/opentelemetry-javaagent.jar && \
+#    curl -L -k https://github.com/aerogear/keycloak-metrics-spi/releases/download/${KEYCLOAK_METRICS_SPI_RELEASE}/keycloak-metrics-spi-${KEYCLOAK_METRICS_SPI_RELEASE}.jar  -o /opt/keycloak/providers/keycloak-metrics-spi.jar

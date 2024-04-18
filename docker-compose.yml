@@ -17,8 +17,11 @@ services:
       - "8083:80"
     container_name: my-atts-frontend
     depends_on:
-      - backend
-      - keycloak
+      backend:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
   backend:
     image: atts_backend
     build:
@@ -38,12 +41,18 @@ services:
       - "${BE_PORT}:8082"
     container_name: my-atts-backend
     depends_on:
-      - keycloak
-      - mysql
+      keycloak:
+        condition: service_started
+      mysql:
+        condition: service_healthy
     volumes:
       - be-vol:/app/invoices
+
   keycloak:
-    image: quay.io/keycloak/keycloak:latest
+    build:
+      dockerfile: Dockerfile.keycloak
+      args:
+        KEYCLOAK_VERSION: 24.0
     container_name: keycloak
     restart: always
     ports:
@@ -51,10 +60,12 @@ services:
     volumes:
       - /root/atts_deploy/atts/factureapi.fr_ssl_certificate.cer:/etc/x509/https/tls.crt
       - /root/atts_deploy/atts/_.factureapi.fr_private_key.key:/etc/x509/https/tls.key
+      #- ./realms:/opt/keycloak/data/import:ro
       - keycloak-vol:/opt/keycloak/data
     environment:
+      #- JAVA_OPTS_KC_HEAP="-XX:MaxHeapFreeRatio=30 -XX:InitialRAMPercentage=50 -XX:MaxRAMPercentage=65"
       - KEYCLOAK_ADMIN=keycloak_admin
-      - KEYCLOAK_ADMIN_PASSWORD=keycloak_12
+      - KEYCLOAK_ADMIN_PASSWORD=change_me
       - KC_HTTPS_CERTIFICATE_KEY_FILE=/etc/x509/https/tls.key
       - KC_HTTPS_CERTIFICATE_FILE=/etc/x509/https/tls.crt
       # - KC_HOSTNAME_STRICT=false
@@ -63,8 +74,10 @@ services:
       # - DB_SCHEMA=keycloak
       # - DB_USERNAME=keycloak
       # - DB_PASSWORD=keycloak
-    command:
-      - "start-dev"
+    #command: start-dev --import-realm
+    command: start-dev
+    #command: start --optimized
+
   mysql:
     image: mysql:latest
     restart: always
@@ -86,6 +99,13 @@ services:
       - db-data:/var/lib/mysql
       # - db-vol:/var/lib/mysql
       - ./db.sql:/docker-entrypoint-initdb.d/db.sql
+    healthcheck:
+      test: mysqladmin --slient ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD}
+      start_period: 1m
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   db-data:
     driver: local
